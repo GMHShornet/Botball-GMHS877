@@ -60,6 +60,22 @@ int main()
     TurnRight(90);
     BackFollowLine(100);
     
+    // drop off
+    
+    Reverse(10);
+    TurnLeft(180);
+    FrontFollowLine(200);
+    
+    //servo stuff to flick switch
+    
+    TurnRight(180);
+    BackFollowLine(200);
+    
+    // grab
+    
+    TurnLeft(90);
+    FrontFollowLine(200);
+    
 
     
     disable_servos();
@@ -74,8 +90,8 @@ void Drive(int dis)
     
 	while ( abs(gmpc(leftMotorPort))< dis * ticksToCentimeters)
 	{
-		mav(leftMotorPort, 750);
-        mav(rightMotorPort, 750);
+		mav(leftMotorPort, 850);
+        mav(rightMotorPort, 900);
         msleep(10);
 	}
 }
@@ -84,7 +100,7 @@ void FindLine(int IRport)
 {
     while (analog(IRport) < blackline)
     {
-		mav(leftMotorPort, 750);
+		mav(leftMotorPort, 740);
         mav(rightMotorPort, 750);
         msleep(10);
     }
@@ -178,14 +194,14 @@ void BackFollowLine(int distance)
     {
         if(analog(backIRPort) < blackline)
         {
-            mav(leftMotorPort, 500);
-            mav(rightMotorPort, 750);
+            mav(leftMotorPort, 200);
+            mav(rightMotorPort, 950);
             msleep(10);
         }
         else if (analog (backIRPort) > blackline)
         {
-            mav(rightMotorPort, 500);
-            mav(leftMotorPort, 750);
+            mav(rightMotorPort, 200);
+            mav(leftMotorPort, 950);
             msleep(10);
         }
         
@@ -201,14 +217,14 @@ void FrontFollowLine(int distance)
     {
         if(analog(frontIRPort) < blackline)
         {
-            mav(leftMotorPort, 750);
-            mav(rightMotorPort, 500);
+            mav(leftMotorPort, 950);
+            mav(rightMotorPort, 200);
             msleep(10);
         }
         else if (analog (frontIRPort) > blackline)
         {
-            mav(rightMotorPort, 750);
-            mav(leftMotorPort, 500);
+            mav(rightMotorPort, 950);
+            mav(leftMotorPort, 200);
             msleep(10);
         }
         
