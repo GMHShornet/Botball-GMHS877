@@ -1,0 +1,216 @@
+#include <kipr/wombat.h>
+
+//port variables
+int leftMotorPort = 2;
+int rightMotorPort = 1;
+int leftBumpPort = 0;
+int rightBumpPort = 1; 
+int backIRPort = 0;
+int frontIRPort = 3;
+
+int checkWhite;
+int whiteValue = 0;
+int blackValue;
+int blackline;
+
+int ninety= 1300;
+float ticksToDegrees = 15.46f;
+float ticksToCentimeters = 93;
+
+void Drive(int dis);
+void FindLine(int IRport);
+void TurnRight(int angle);
+void TurnLeft(int angle);
+void Reverse(int dis);
+void Bump();
+void Stop();
+void ArcRight( float angle);
+void ArcLeft( float angle);
+void BackFollowLine(int distance);
+void FrontFollowLine(int distance);
+
+int main()
+{
+    while(a_button() == 0)
+    {
+        if(b_button() == 1 && checkWhite == 0)
+        {
+            whiteValue = analog(backIRPort);
+            printf("%dn/", whiteValue);   
+            checkWhite = 1;                 
+        }        
+        else if(b_button() == 0 && checkWhite == 1)
+        {     
+            checkWhite = 2;
+        }
+        else if(b_button() == 1 && checkWhite == 2)
+        {
+            blackValue = analog(backIRPort);
+            printf("%d", blackValue); 
+            checkWhite = 3;
+        }
+    }
+    blackline = (whiteValue + blackValue) / 2;
+    enable_servos();    
+    //wait_for_light(0);
+    //shut_down_in(119);    
+    
+    Drive(100);
+    FindLine(backIRPort);
+    TurnRight(90);
+    BackFollowLine(100);
+    
+
+    
+    disable_servos();
+    
+    return 0;
+}
+
+void Drive(int dis)
+{
+	cmpc(leftMotorPort);
+	cmpc(rightMotorPort);
+    
+	while ( abs(gmpc(leftMotorPort))< dis * ticksToCentimeters)
+	{
+		mav(leftMotorPort, 750);
+        mav(rightMotorPort, 750);
+        msleep(10);
+	}
+}
+
+void FindLine(int IRport)
+{
+    while (analog(IRport) < blackline)
+    {
+		mav(leftMotorPort, 750);
+        mav(rightMotorPort, 750);
+        msleep(10);
+    }
+}
+
+void TurnRight(int angle)
+{
+    cmpc(leftMotorPort);
+    cmpc(rightMotorPort);
+    
+    while (abs(gmpc(rightMotorPort)) < angle * ticksToDegrees)
+    {
+		mav(leftMotorPort,500);
+        mav(rightMotorPort,-500);
+        msleep(0);
+    }
+}
+
+void Reverse(int dis)
+{
+	cmpc(leftMotorPort);
+	cmpc(rightMotorPort);
+    
+	while ( abs(gmpc(leftMotorPort))< dis* ticksToCentimeters)
+	{
+		mav(leftMotorPort,-750);
+        mav(rightMotorPort,-750);
+        msleep(10);
+	}
+}
+
+void Bump()
+{
+    while (digital(leftBumpPort) == 0 || digital(rightBumpPort) == 0)
+    {
+        mav(leftMotorPort,-750);
+        mav(rightMotorPort,-750);
+        msleep(10);
+    }
+}
+
+void Stop()
+{
+    mav(leftMotorPort,0);
+    mav(rightMotorPort,0);
+    msleep(1000);
+}
+
+void TurnLeft(int angle)
+{
+    cmpc(leftMotorPort);
+    cmpc(rightMotorPort);
+    
+    while (abs(gmpc(leftMotorPort)) < angle * ticksToDegrees)
+    {
+        mav(leftMotorPort,-750);
+        mav(rightMotorPort,750);
+        msleep(10);
+    }
+}
+
+void ArcRight(float angle)
+{
+	cmpc(rightMotorPort);
+    cmpc(leftMotorPort);
+    
+    while (abs(gmpc(leftMotorPort)) < 2 * angle * ticksToDegrees)
+    {
+        mav(leftMotorPort, 750);
+        msleep(10);
+    }
+}
+void ArcLeft(float angle)
+{
+	cmpc(rightMotorPort);
+    cmpc(leftMotorPort);
+    
+    while (abs(gmpc(rightMotorPort)) < 2 * angle * ticksToDegrees)
+    {
+        mav(rightMotorPort, 750);
+        msleep(10);
+    }
+}
+
+void BackFollowLine(int distance)
+{
+    cmpc(rightMotorPort);
+    cmpc(leftMotorPort);
+    
+    while(abs(gmpc(leftMotorPort)) < distance*ticksToCentimeters)
+    {
+        if(analog(backIRPort) < blackline)
+        {
+            mav(leftMotorPort, 500);
+            mav(rightMotorPort, 750);
+            msleep(10);
+        }
+        else if (analog (backIRPort) > blackline)
+        {
+            mav(rightMotorPort, 500);
+            mav(leftMotorPort, 750);
+            msleep(10);
+        }
+        
+    }
+}
+
+void FrontFollowLine(int distance)
+{
+    cmpc(rightMotorPort);
+    cmpc(leftMotorPort);
+    
+    while(abs(gmpc(leftMotorPort)) < distance*ticksToCentimeters)
+    {
+        if(analog(frontIRPort) < blackline)
+        {
+            mav(leftMotorPort, 750);
+            mav(rightMotorPort, 500);
+            msleep(10);
+        }
+        else if (analog (frontIRPort) > blackline)
+        {
+            mav(rightMotorPort, 750);
+            mav(leftMotorPort, 500);
+            msleep(10);
+        }
+        
+    }
+}
